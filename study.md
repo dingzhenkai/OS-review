@@ -76,6 +76,90 @@ PIO是 [CPU](https://zh.wikipedia.org/wiki/CPU) 与[外围设备](https://zh.wik
 
 主存（Main memory）即计算机内部最主要的存储器，用来加载各式各样的程序与数据以供[CPU](https://zh.wikipedia.org/wiki/CPU)直接运行与运用。由于[DRAM](https://zh.wikipedia.org/wiki/DRAM)的[性价比](https://zh.wikipedia.org/wiki/%E6%80%A7%E5%83%B9%E6%AF%94)很高，且扩展性也不错，是现今一般计算机[主存](https://zh.wikipedia.org/wiki/%E4%B8%BB%E8%A8%98%E6%86%B6%E9%AB%94)的最主要部分。
 
+PC架构：von Neumann Model（冯 诺伊曼模式）![](D:\course_material\os\final\pics\0003.JPG)
+
+程序运行时，程序的指令和数据会被读到主存里面，CPU会一条一条的执行主存里面的指令。
+
+x86运行模式：
+
+1. 实模式：
+
+实地址模式（real-addess mode）——该模式以扩展的方式实现了8086CPU的程序运行环境（就像切换到保护模式和系统管理模式一样）。处理器在刚刚上电或者重启后的时候，处于实地址模式。
+
+1. 保护模式：
+
+保护模式（protected mode）——是处理器的根本模式，在保护模式下，可以为直接运行的实地址模式程序提供保护的、多任务的环境，这种特性被称作“虚拟8086模式（virtual 8086 mode）”,尽管“虚拟8086”模式并不是一种真正的处理器模式；virtual 8086 mode实际上是保护模式的一种属性，在保护模式下，可以向任何任务提供这种属性。
+
+1. SMM：
+
+系统管理模式（system manangement mode，SMM）——该模式提供操作系统或者执行程序一种透明的机制去实现平台相关的特性，例如电源管理和系统安全。当来自外部的或者APIC控制器的SMM中断pin脚被触发时，处理器在下列情况进入SMM。在SMM下，处理器切换到一个独立的地址空间，同时保存当前运行的程序或任务的上下文。SMM相关的代码可透明的执行。当SMM模式返回时，处理器返回SMI（system manangement interrupt）前的工作模式。SMM模式在Intel 386 SL和Intel 486 SL处理器时被引入，在Pentium家族时成为标准的IA-32架构的特性。
+
+[实模式保护模式SMM必读](http://ahhqlrg.blog.163.com/blog/static/10592880520156635551198/)
+
+x86控制寄存器：
+
+1. CR0: 
+
+   | Bit  | Name | Full Name                                                | Description                                                  |
+   | ---- | ---- | -------------------------------------------------------- | ------------------------------------------------------------ |
+   | 0    | PE   | Protected Mode Enable                                    | If 1, system is in [protected mode](https://en.wikipedia.org/wiki/Protected_mode), else system is in [real mode](https://en.wikipedia.org/wiki/Real_mode) |
+   | 1    | MP   | Monitor co-processor                                     | Controls interaction of WAIT/FWAIT instructions with TS flag in CR0 |
+   | 2    | EM   | Emulation                                                | If set, no x87 [floating point unit](https://en.wikipedia.org/wiki/Floating_point_unit) present, if clear, x87 FPU present |
+   | 3    | TS   | Task switched                                            | Allows saving x87 task context upon a task switch only after x87 instruction used |
+   | 4    | ET   | Extension type                                           | On the 386, it allowed to specify whether the external math coprocessor was an [80287](https://en.wikipedia.org/wiki/80287) or [80387](https://en.wikipedia.org/wiki/80387) |
+   | 5    | NE   | Numeric error                                            | Enable internal [x87](https://en.wikipedia.org/wiki/X87) floating point error reporting when set, else enables PC style x87 error detection |
+   | 16   | WP   | Write protect                                            | When set, the CPU can't write to read-only pages when privilege level is 0 |
+   | 18   | AM   | Alignment mask                                           | Alignment check enabled if AM set, AC flag (in [EFLAGS](https://en.wikipedia.org/wiki/FLAGS_register_(computing)) register) set, and privilege level is 3 |
+   | 29   | NW   | Not-write through                                        | Globally enables/disable write-through caching               |
+   | 30   | CD   | [Cache](https://en.wikipedia.org/wiki/CPU_cache) disable | Globally enables/disable the memory cache                    |
+   | 31   | PG   | Paging                                                   | If 1, enable paging and use the CR3 register, else disable paging |
+
+2. CR1:预留给之后用的，现在调用会抛exception
+
+3. CR2:用于发生Page Fault报告出错信息。当发生页异常时，处理器把引起页异常的线性地址保存在CR2中。操作系统中的页异常处理程序可以检查CR2的内容，从而查出线性地址空间中的哪一页引起本次异常。 
+
+4. CR3:用于保存页目录表页面的物理地址，因此被称为PDBR。由于目录是页对齐的，所以仅高20位有效，低12 位保留供更加高级的处理器使用。向CR3中装入一个新值时，低12位必须为0；但从 CR3中取值时，低12位被忽略。每当用MOV指令重置CR3的值时，会导致分页机制高速缓冲区的内容无效，用此方法，可以在启用分页机制之前，即把PG 位置1之前，预先刷新分页机制的高速缓存。CR3寄存器即使在CR0寄存器的PG位或PE位为0时也可装入，如在实模式下也可设置CR3，以便进行分页机制的初始化。在任务切换时，CR3要被改变，但是如果新任务中CR3的值与原任务中CR3的值相同，那么处理器不刷新分页高速缓存，以便当任务共享页表时有较快的执行速度。
+
+5. CR4：Used in protected mode to control operations such as virtual-8086 support, enabling I/O breakpoints, [page size extension](https://en.wikipedia.org/wiki/Page_Size_Extension) and [machine check exceptions](https://en.wikipedia.org/wiki/Machine_Check_Exception).
+
+   | Bit  | Name                                                         | Full Name                                                    | Description                                                  |
+   | ---- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+   | 0    | VME                                                          | [Virtual 8086 Mode Extensions](https://en.wikipedia.org/wiki/Virtual_8086_Mode_Extensions) | If set, enables support for the virtual interrupt flag (VIF) in virtual-8086 mode. |
+   | 1    | PVI                                                          | Protected-mode Virtual Interrupts                            | If set, enables support for the virtual interrupt flag (VIF) in protected mode. |
+   | 2    | TSD                                                          | Time Stamp Disable                                           | If set, [RDTSC](https://en.wikipedia.org/wiki/Time_Stamp_Counter) instruction can only be executed when in [ring 0](https://en.wikipedia.org/wiki/Ring_(computer_security)), otherwise RDTSC can be used at any privilege level. |
+   | 3    | DE                                                           | Debugging Extensions                                         | If set, enables debug register based breaks on I/O space access |
+   | 4    | PSE                                                          | [Page Size Extension](https://en.wikipedia.org/wiki/Page_Size_Extension) | If unset, page size is 4 KiB, else page size is increased to 4 MiB (if PAE is enabled or the processor is in Long Mode this bit is ignored[[2\]](https://en.wikipedia.org/wiki/Control_register#cite_note-AMD64-Vol2-2)). |
+   | 5    | PAE                                                          | [Physical Address Extension](https://en.wikipedia.org/wiki/Physical_Address_Extension) | If set, changes page table layout to translate 32-bit virtual addresses into extended 36-bit physical addresses. |
+   | 6    | MCE                                                          | Machine Check Exception                                      | If set, enables machine check interrupts to occur.           |
+   | 7    | PGE                                                          | Page Global Enabled                                          | If set, address translations (PDE or PTE records) may be shared between address spaces. |
+   | 8    | PCE                                                          | Performance-Monitoring Counter enable                        | If set, RDPMC can be executed at any privilege level, else RDPMC can only be used in ring 0. |
+   | 9    | OSFXSR                                                       | Operating system support for FXSAVE and FXRSTOR instructions | If set, enables [SSE](https://en.wikipedia.org/wiki/Streaming_SIMD_Extensions) instructions and fast FPU save & restore |
+   | 10   | OSXMMEXCPT                                                   | Operating System Support for Unmasked SIMD Floating-Point Exceptions | If set, enables unmasked SSE exceptions.                     |
+   | 11   | UMIP                                                         | User-Mode Instruction Prevention                             | If set, the SGDT, SIDT, SLDT, SMSW and STR instructions cannot be executed if CPL > 0[[1\]](https://en.wikipedia.org/wiki/Control_register#cite_note-Intel-Vol3a1-1). |
+   | 12   | LA57                                                         | (none specified)                                             | If set, enables 5-Level Paging[[3\]](https://en.wikipedia.org/wiki/Control_register#cite_note-Intel-5LP-3). |
+   | 13   | VMXE                                                         | Virtual Machine Extensions Enable                            | see [Intel VT-x](https://en.wikipedia.org/wiki/Intel_VT-x)   |
+   | 14   | SMXE                                                         | Safer Mode Extensions Enable                                 | see [Trusted Execution Technology](https://en.wikipedia.org/wiki/Trusted_Execution_Technology) (TXT) |
+   | 16   | FSGSBASE                                                     | Enables the instructions RDFSBASE, RDGSBASE, WRFSBASE, and WRGSBASE. |                                                              |
+   | 17   | PCIDE                                                        | PCID Enable                                                  | If set, enables process-context identifiers (PCIDs).         |
+   | 18   | OSXSAVE                                                      | XSAVE and Processor Extended States Enable                   |                                                              |
+   | 20   | SMEP[[4\]](https://en.wikipedia.org/wiki/Control_register#cite_note-4) | Supervisor Mode Execution Protection Enable                  | If set, execution of code in a higher ring generates a fault |
+   | 21   | SMAP                                                         | [Supervisor Mode Access Prevention](https://en.wikipedia.org/wiki/Supervisor_Mode_Access_Prevention) Enable | If set, access of data in a higher ring generates a fault[[5\]](https://en.wikipedia.org/wiki/Control_register#cite_note-5) |
+   | 22   | PKE                                                          | Protection Key Enable                                        | See Intel® 64 and IA-32 Architectures Software Developer’s Manual |
+
+Memory-management Register(内存管理寄存器)
+
+1. GDTR（Global Descriptor Table Register）存放GDT的入口地址，**物理地址**
+2. IDTR (Interrupt Descriptor Table Register)
+3. TR(Task Register)
+
+[内存管理笔记(分页，分段，逻辑地址，物理地址与地址转换方式)](https://www.cnblogs.com/felixfang/p/3420462.html)
+
+
+
+## OS-3
+
+
+
 
 
 
@@ -144,13 +228,27 @@ Question:Which software does ABI Emulation?
 
 ## 不懂
 
-OS-1 23-27
+【已解决】OS-1 23-27
+
+OS-2 13-16
 
 chip是什么
 
 虚拟机的IP是什么，虚拟化的原理？
 
+【[已解答](https://www.zhihu.com/question/29918252)】线性地址，逻辑地址，物理地址，虚拟地址的区别？
+
+逻辑地址：段：偏移
+
+线性地址：段描述符+偏移（因为段描述符被设置为0）所以线性地址数值上等于虚拟地址
+
+虚拟地址；偏移
+
+物理地址：线性地址地址翻译
+
 【[已解答](https://blog.csdn.net/czg13548930186/article/details/52290085)】系统的存储，DRAM，SRAM，RAM，FLASH STORAGE
+
+GDT里面存的什么，跟代码段 数据段这些有什么关系
 
 ## 英语
 
