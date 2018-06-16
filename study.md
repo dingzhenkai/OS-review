@@ -130,7 +130,7 @@ Memory-management Register(内存管理寄存器)
 4. IPC与线程间通信？？？
 5. 对Syscall的处理：trap 到用户模式
 6. 微内核把所有原来内核里面的系统服务都用进程来实现，要调用系统服务的时候，使用IPC
-   ![](D:\course_material\os\final\pics\0004.JPG)
+   ![](D:\Courses\OS\PPT\pics\0004.JPG)
 7. Redirection allows call traps to link directly to executable binaries without modifying the kernel!Just need an emulation library
 
 #### L4 Microkernel
@@ -142,9 +142,36 @@ Memory-management Register(内存管理寄存器)
 
 Exokernel微内核的核心观点是：只要内核还提供对系统资源的抽象，就不能实现性能的最大优化 -- 内核应该支持一个最小的、高度优化的原语集，而不是提供对系统资源的抽象。从这个观点上来说，IPC也是一个太高级的抽象因而不能达到最高的性能。Exokernel微内核的核心是支持一个高度优化的原语名叫保护控制转移(protected control transfer, PCT)。PCT是一个不带参数的跨地址空间的过程调用，其功能类似于一个硬件中断。在PCT的基础上，可以实现高级的IPC抽象如RPC。在MIPS R3000处理器上，一个基于PCT的RPC实现了仅10µs的开销，而在同一硬件上运行的Mach RPC为95µs。
 
+内核分配资源，应用自己来实现内存管理，文件系统等功能。
+
+exokernel 为不同的应用分配硬件资源，并确保不会把一个资源同时分配给多个应用，达
+到应用间隔离的效果。
+to separate protection from management ：Exokernel 只负责资源的分配、回收等，而资源如
+何使用由应用自己负责。
+
+#### Hybrid kernel
+
+is a kernel architecturebased on combining aspects of microkernel and monolithickernel architectures used in computer operating systems.
+
+就是单片内核+微内核
+
+![](D:\Courses\OS\PPT\pics\0005.jpg)
 
 
 
+
+
+### OS-4
+
+PAE
+
+![](D:\Courses\OS\PPT\pics\0006.JPG)
+
+
+
+### OS-5
+
+线程跟地址空间是独立的，线程可以有自己独立的地址空间，也可以没有
 
 
 
@@ -283,6 +310,14 @@ Linux 的系统调用通过 int 80h 实现，用[系统调用号](https://zh.wik
 2. 把函数参数存入其它通用寄存器；
 3. 触发 0x80 号中断（int 0x80）。
 
+#### PTE中的dirty bit
+
+表示这个页有没有没写过
+
+#### page fault
+
+MMU翻译后找到的PTE中有效位为0
+
 ####
 
 ## TODO
@@ -326,6 +361,12 @@ HW的标准答案
 什么是trap（csapp 异常控制流）
 
 什么是IPC的port
+
+对L4的微内核来说，什么是异步的IPC
+
+外内核如何确保安全，应用之间不会
+
+OS-4 11,14
 
 ## 英语
 
