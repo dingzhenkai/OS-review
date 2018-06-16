@@ -120,6 +120,28 @@ Memory-management Register(内存管理寄存器)
 
 ## OS-3
 
+系统设计要注意模块化，设计与实现分离，这样设计需要修改时，实现可以不用大改。
+
+#### MicroKernel
+
+1. 最小的分配单元：进程
+2. 最小的执行单元：线程
+3. 应用可以实现自己的CPU调度
+4. IPC与线程间通信？？？
+5. 对Syscall的处理：trap 到用户模式
+6. 微内核把所有原来内核里面的系统服务都用进程来实现，要调用系统服务的时候，使用IPC
+   ![](D:\course_material\os\final\pics\0004.JPG)
+7. Redirection allows call traps to link directly to executable binaries without modifying the kernel!Just need an emulation library
+
+#### L4 Microkernel
+
+1. 之前的IPC的copy是先copy到kernel，然后kernel再copy到系统服务进程，在L4里面是直接copy到系统服务进程，不经过kernel
+2. 异步的IPC
+
+#### Exokernel
+
+Exokernel微内核的核心观点是：只要内核还提供对系统资源的抽象，就不能实现性能的最大优化 -- 内核应该支持一个最小的、高度优化的原语集，而不是提供对系统资源的抽象。从这个观点上来说，IPC也是一个太高级的抽象因而不能达到最高的性能。Exokernel微内核的核心是支持一个高度优化的原语名叫保护控制转移(protected control transfer, PCT)。PCT是一个不带参数的跨地址空间的过程调用，其功能类似于一个硬件中断。在PCT的基础上，可以实现高级的IPC抽象如RPC。在MIPS R3000处理器上，一个基于PCT的RPC实现了仅10µs的开销，而在同一硬件上运行的Mach RPC为95µs。
+
 
 
 
@@ -216,6 +238,53 @@ MMU负责地址翻译，TLB是地址翻译的cache。
 
 有时，TLB或PTE会禁止对虚拟页的访问，这可能是因为没有物理[随机存取存储器](https://zh.wikipedia.org/wiki/%E9%9A%8F%E6%9C%BA%E5%AD%98%E5%8F%96%E5%AD%98%E5%82%A8%E5%99%A8)（random access memory）与虚拟页相关联。如果是这种情况，MMU将向CPU发出[页错误](https://zh.wikipedia.org/wiki/%E9%A1%B5%E9%94%99%E8%AF%AF)（page fault）的信号。[操作系统](https://zh.wikipedia.org/wiki/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F)operating system）将进行处理，也许会尝试寻找RAM的空白帧，同时创建一个新的PTE将之映射到所请求的虚拟地址。如果没有空闲的RAM，可能必须关闭一个已经存在的页面，使用一些替换算法，将之保存到磁盘中（这被称之为[页面调度](https://zh.wikipedia.org/w/index.php?title=%E9%A1%B5%E9%9D%A2%E8%B0%83%E5%BA%A6&action=edit&redlink=1)（paging）。在一些MMU中，PTEs或者TLB也存在一些缺点，在这样的情况下操作系统将必须释放空间以供新的映射。
 
+####BIOS
+
+BIOS是英文"Basic Input Output System"的缩略语，直译过来后中文名称就是"[基本输入输出系统](https://www.baidu.com/s?wd=%E5%9F%BA%E6%9C%AC%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E7%B3%BB%E7%BB%9F&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)"。其实，它是一组固化到计算机内主板上一个ROM芯片上的程序，它保存着计算机最重要的基本输入输出的程序、系统设置信息、开机后自检程序和系统自启动程序。 其主要功能是为计算机提供最底层的、最直接的硬件设置和控制。
+
+####ROM
+
+ROM是只读内存（Read-Only Memory）的简称，是一种只能读出事先所存数据的固态[半导体存储器](https://www.baidu.com/s?wd=%E5%8D%8A%E5%AF%BC%E4%BD%93%E5%AD%98%E5%82%A8%E5%99%A8&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)。其特性是一旦储存资料就无法再将之改变或删除。通常用在不需经常变更资料的电子或[电脑系统](https://www.baidu.com/s?wd=%E7%94%B5%E8%84%91%E7%B3%BB%E7%BB%9F&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)中，资料并且不会因为电源关闭而消失。
+
+####RAM
+
+RAM（random access memory）随机存储器。存储单元的内容可按需随意取出或存入，且存取的速度与存储单元的位置无关的存储器。这种存储器在断电时将丢失其存储内容，故主要用于存储短时间使用的程序。 按照存储信息的不同，随机存储器又分为[静态随机存储器](https://www.baidu.com/s?wd=%E9%9D%99%E6%80%81%E9%9A%8F%E6%9C%BA%E5%AD%98%E5%82%A8%E5%99%A8&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)（Static RAM,SRAM)和动态随机存储器（Dynamic RAM,DRAM)。
+
+#### CMOS
+
+CMOS（Complementary Metal Oxide Semiconductor），[互补金属氧化物半导体](https://www.baidu.com/s?wd=%E4%BA%92%E8%A1%A5%E9%87%91%E5%B1%9E%E6%B0%A7%E5%8C%96%E7%89%A9%E5%8D%8A%E5%AF%BC%E4%BD%93&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)，电压控制的一种放大器件。是组成[CMOS数字集成电路](https://www.baidu.com/s?wd=CMOS%E6%95%B0%E5%AD%97%E9%9B%86%E6%88%90%E7%94%B5%E8%B7%AF&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)的基本单元。
+
+####BIOS与CMOS
+
+BIOS与CMOS
+区别　　由于CMOS与BIOS都跟[电脑系统](https://www.baidu.com/s?wd=%E7%94%B5%E8%84%91%E7%B3%BB%E7%BB%9F&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)设置密切相关，所以才有CMOS设置和BIOS设置的说法。也正因此，初学者常将二者混淆。CMOS 是电脑主机板上一块特殊的RAM芯片，是系统参数存放的地方，而BIOS中系统设置程序是完成参数设置的手段。因此，准确的说法应是通过BIOS设置程序对CMOS参数进行设置。而我们平常所说的CMOS设置和BIOS设置是其简化说法，也就在一定程度上造成了两个概念的混淆。事实上，BIOS程序是储存在主板上一块 EEPROM Flash 芯片中的，CMOS存储器是用来存储BIOS设定后的要保存数据的，包括一些系统的硬件配置和用户对某些参数的设定，比如传统BIOS的系统密码和设备启动顺序等等 
+联系　　BIOS是一组设置硬件的电脑程序，保存在主板上的一块EPROM或EEPROM芯片中，里面装有系统的重要信息和设置系统参数的设置程序——BIOS Setup程序。而CMOS即：Complementary Metal Oxide Semiconductor——[互补金属氧化物半导体](https://www.baidu.com/s?wd=%E4%BA%92%E8%A1%A5%E9%87%91%E5%B1%9E%E6%B0%A7%E5%8C%96%E7%89%A9%E5%8D%8A%E5%AF%BC%E4%BD%93&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)，是主板上的一块可读写的RAM芯片，用来保存当前系统的硬件配置和用户对参数的设定，其内容可通过设置程序进行读写。[CMOS芯片](https://www.baidu.com/s?wd=CMOS%E8%8A%AF%E7%89%87&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)由主板上的[钮扣电池](https://www.baidu.com/s?wd=%E9%92%AE%E6%89%A3%E7%94%B5%E6%B1%A0&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)供电，即使系统断电，参数也不会丢失。[CMOS芯片](https://www.baidu.com/s?wd=CMOS%E8%8A%AF%E7%89%87&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao)只有保存数据的功能，而对CMOS中各项参数的修改要通过BIOS的设定程序来实现。BIOS与CMOS既相关又不同：BIOS中的系统设置程序是完成CMOS参数设置的手段；CMOS RAM既是BIOS设定系统参数的存放场所，又是 BIOS设定系统参数的结果。因此，完整的说法应该是“通过BIOS设置程序对CMOS参数进行设置”。由于 BIOS和CMOS都跟系统设置密初相关，所以在实际使用过程中造成了BIOS设置和CMOS设置的说法，其实指的都是同一回事，但BIOS与CMOS却是两个完全不同的概念，切勿混淆。
+
+####volatile
+
+volatile是一个类型[修饰符](https://baike.baidu.com/item/%E4%BF%AE%E9%A5%B0%E7%AC%A6)（type specifier），就像大家更熟悉的const一样，它是被设计用来修饰被不同线程访问和修改的[变量](https://baike.baidu.com/item/%E5%8F%98%E9%87%8F/5271)。**volatile**的作用是作为指令[关键字](https://baike.baidu.com/item/%E5%85%B3%E9%94%AE%E5%AD%97)，确保本条指令不会因[编译器](https://baike.baidu.com/item/%E7%BC%96%E8%AF%91%E5%99%A8)的优化而省略，且要求每次直接读值。
+
+volatile的变量是说这变量可能会被意想不到地改变，这样，[编译器](https://baike.baidu.com/item/%E7%BC%96%E8%AF%91%E5%99%A8)就不会去假设这个变量的值了。
+
+#### System call
+
+Linux 的系统调用通过 int 80h 实现，用[系统调用号](https://zh.wikipedia.org/w/index.php?title=%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E5%8F%B7&action=edit&redlink=1)来区分入口函数。操作系统实现系统调用的基本过程是：
+
+1. 应用程序调用库函数（API）；
+2. API 将系统调用号存入 EAX，然后通过中断调用使系统进入内核态；
+3. 内核中的中断处理函数根据系统调用号，调用对应的内核函数（系统调用）；
+4. 系统调用完成相应功能，将返回值存入 EAX，返回到中断处理函数；
+5. 中断处理函数返回到 API 中；
+6. API 将 EAX 返回给应用程序。
+
+应用程序调用系统调用的过程是：
+
+1. 把系统调用的编号存入 EAX；
+2. 把函数参数存入其它通用寄存器；
+3. 触发 0x80 号中断（int 0x80）。
+
+####
+
 ## TODO
 
 **？？？**User ISA与System ISA的区别：系统ISA中有一些特权指令
@@ -229,6 +298,8 @@ Question:Which software does ABI Emulation?
 【已解决】OS-1 23-27
 
 OS-2 33-41
+
+【已解决】OS-3 14-15(害处)  OS-17
 
 chip是什么
 
@@ -248,6 +319,14 @@ chip是什么
 
 GDT里面存的什么，跟代码段 数据段这些有什么关系
 
+HW的标准答案
+
+【[半解决](https://www.jianshu.com/p/9218692cb209)】IPC与线程间通信
+
+什么是trap（csapp 异常控制流）
+
+什么是IPC的port
+
 ## 英语
 
 voltage:电压
@@ -265,3 +344,13 @@ unified:统一的
 decouple:解耦
 
 infrastructure：基础设施
+
+resident:定居的，常驻的，存于内存中的
+
+detriment:损害 不利
+
+primitive: 原始的，原函数
+
+eliminate: 消除 
+
+Rendezvous:会合
