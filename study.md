@@ -10,7 +10,7 @@ ABI（Application Binary Layer）应用程序二进制接口，跟系统有关�
 
 API（Application Programming Interface）程序调用库函数，read(),write()
 
-![](D:\Courses\OS\PPT\pics\0001.JPG)
+![](D:\course_material\os\final\pics\0001.JPG)
 
 ### 8 important problems
 
@@ -136,6 +136,9 @@ Memory-management Register(内存管理寄存器)
 #### L4 Microkernel
 
 1. 之前的IPC的copy是先copy到kernel，然后kernel再copy到系统服务进程，在L4里面是直接copy到系统服务进程，不经过kernel
+
+   send把数据copy到内核控制的一块区域，然后将这块区域映射到receiver的地址空间
+
 2. 异步的IPC
 
 #### Exokernel
@@ -149,15 +152,34 @@ exokernel 为不同的应用分配硬件资源，并确保不会把一个资源�
 to separate protection from management ：Exokernel 只负责资源的分配、回收等，而资源如
 何使用由应用自己负责。
 
+Exokernel are much smaller than a normal kernel (monolithic kernel). They give more direct access to the hardware, thus removing most abstractions
+
+外内核的三种保护措施：
+
+1. Secure Binding:
+   应用需要什么资源，外内核给应用分配资源，将此资源与应用绑定，意思是不再将这个资源分配给其他应用
+2. VIsible resource revocaton
+   当应用使用完资源，内核会先通知应用再回收资源。传统是直接回收，不通知。
+3. Abort
+   当应用不归还资源时，内核强行收回。
+
+Library OS:
+
+外内核不管操作系统是什么，他只分配资源，把操作系统抽象成链接库，库可以有多个，给进程提供抽象。外内核不提供关于文件系统，虚拟内存，IO的抽象，这些都由Library OS来提供。
+
+##### 
+
+
+
 #### Hybrid kernel
 
 is a kernel architecturebased on combining aspects of microkernel and monolithickernel architectures used in computer operating systems.
 
 就是单片内核+微内核
 
-![](D:\Courses\OS\PPT\pics\0005.jpg)
 
 
+![](D:\course_material\os\final\pics\0005.jpg)
 
 
 
@@ -165,13 +187,59 @@ is a kernel architecturebased on combining aspects of microkernel and monolithic
 
 PAE
 
-![](D:\Courses\OS\PPT\pics\0006.JPG)
+![](D:\course_material\os\final\pics\0006.JPG)
 
 
 
 ### OS-5
 
-线程跟地址空间是独立的，线程可以有自己独立的地址空间，也可以没有
+#####线程
+
+线程跟地址空间是独立的，线程可以有自己独立的地址空间，也可以没有。
+
+##### 进程
+
+进程包括程序计数器，栈，数据段
+
+PCB:
+
+- **The process scheduling state:** The state of the process in terms of "ready", "suspended", etc., and other scheduling information as well, like priority value, the amount of time elapsed since the process gained control of the CPU or since it was suspended. Also, in case of a suspended process, event identification data must be recorded for the event the process is waiting for.
+- **Process structuring information:** process's children id's, or the id's of other processes related to the current one in some functional way, which may be represented as a queue, a ring or other data structures.
+- **Interprocess communication information:** various flags, signals and messages associated with the communication among independent processes may be stored in the PCB.
+- **Process Privileges** in terms of allowed/disallowed access to system resources.
+- **Process State:** State may enter into new, ready, running, waiting, dead depending on CPU scheduling.
+- **Process Number (PID):** A unique identification number for each process in the operating system (also known as [Process ID](https://en.wikipedia.org/wiki/Process_identifier)).
+- **Program** **Counter (PC):** A pointer to the address of the next instruction to be executed for this process.
+- **CPU Registers:** Indicates various register set of CPU where process need to be stored for execution for running state.
+- **CPU Scheduling Information:** indicates the information of a process with which it uses the CPU time through scheduling.
+- **Memory Management Information:** includes the information of page table, memory limits, Segment table depending on memory used by the operating system.
+- **Accounting Information:** Includes the amount of [CPU](https://en.wikipedia.org/wiki/Central_processing_unit) used for process execution, time limits, execution ID etc.
+- **I/O Status Information:** Includes a list of I/O devices allocated to the process.
+
+内核切换进程A到进程B，context switch：
+
+1. 存储进程A的PCB到进程A的地址空间
+2. 从B的地址空间里面读取B的PCB并加载
+
+进程A从用户态到内核态执行，然后返回：
+
+1. 内核存储进程A的PCB到进程A的栈上（就是进程A的地址空间），返回时再读取
+
+父进程与子进程：
+
+1. 子进程复制了父进程的用户地址空间（text,data,bss,堆，栈五个段）
+2. 子进程复制了父进程的打开文件表
+
+##### IPC
+
+1. shared memory:bounded buffer
+2. message passing:send/receive
+
+##### POXIS
+
+1. 一个IPC的协议，基于shared memory
+
+
 
 
 
@@ -241,7 +309,7 @@ Hypervisors是一种在虚拟环境中的“元”操作系统。他们可以访
 
 #### Android Architecture
 
-![](D:\Courses\OS\PPT\pics\0002.JPG)
+![](D:\course_material\os\final\pics\0002.JPG)
 
 #### Programmed I/O
 
@@ -360,13 +428,15 @@ HW的标准答案
 
 什么是trap（csapp 异常控制流）
 
-什么是IPC的port
+【已解决】什么是IPC的port（就是消息队列）
 
 对L4的微内核来说，什么是异步的IPC
 
-外内核如何确保安全，应用之间不会
+【已解决】外内核如何确保安全，应用之间不会
 
-OS-4 11,14
+【已解决】OS-4 11,14
+
+  堆栈的区别？
 
 ## 英语
 
@@ -395,3 +465,6 @@ primitive: 原始的，原函数
 eliminate: 消除 
 
 Rendezvous:会合
+
+revocation:撤销
+
