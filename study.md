@@ -181,17 +181,13 @@ is a kernel architecturebased on combining aspects of microkernel and monolithic
 
 ![](D:\course_material\os\final\pics\0005.jpg)
 
-
-
-### OS-4
+##OS-4
 
 PAE
 
 ![](D:\course_material\os\final\pics\0006.JPG)
 
-
-
-### OS-5
+##OS-5
 
 #####线程
 
@@ -224,6 +220,9 @@ PCB:
 进程A从用户态到内核态执行，然后返回：
 
 1. 内核存储进程A的PCB到进程A的栈上（就是进程A的地址空间），返回时再读取
+2. 将返回地址压入内核栈，压入内核栈的有
+   1. ss(栈段),cs(代码段)的基地址，用来将逻辑地址翻译成线性地址
+   2. esp（栈顶指针），eip（程序计数器，指向下一条将被执行的指令），eflags(存了一些条件码（CF，ZF,SF,OF）ics.p124)
 
 父进程与子进程：
 
@@ -237,7 +236,64 @@ PCB:
 
 ##### POXIS
 
-1. 一个IPC的协议，基于shared memory
+1. [POSIX](https://baike.baidu.com/item/POSIX)表示[可移植操作系统接口](https://baike.baidu.com/item/%E5%8F%AF%E7%A7%BB%E6%A4%8D%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8E%A5%E5%8F%A3)（Portable Operating System Interface of UNIX，缩写为 POSIX ），POSIX标准定义了操作系统应该为应用程序提供的接口标准，是[IEEE](https://baike.baidu.com/item/IEEE)为要在各种UNIX操作系统上运行的软件而定义的一系列API标准的总称，其正式称呼为IEEE 1003，而国际标准名称为ISO/IEC 9945。
+
+   POSIX标准意在期望获得[源代码](https://baike.baidu.com/item/%E6%BA%90%E4%BB%A3%E7%A0%81)级别的[软件可移植性](https://baike.baidu.com/item/%E8%BD%AF%E4%BB%B6%E5%8F%AF%E7%A7%BB%E6%A4%8D%E6%80%A7)。换句话说，为一个POSIX兼容的操作系统编写的程序，应该可以在任何其它的POSIX操作系统（即使是来自另一个厂商）上编译执行。
+
+   POSIX 并不局限于 UNIX。许多其它的操作系统，例如 DEC OpenVMS 支持 POSIX 标准，尤其是 IEEE Std. 1003.1-1990（1995 年修订）或 POSIX.1，POSIX.1 提供了源代码级别的 C 语言应用编程接口（API）给操作系统的服务程序，例如读写文件。POSIX.1 已经被国际标准化组织（International Standards Organization，ISO）所接受，被命名为 ISO/IEC 9945-1:1990 标准。
+
+
+## OS-6
+
+详细介绍了IPC
+
+实现IPC的几种机制：
+
+| Method                                                       | Short Description                                            | Provided by ([operating systems](https://en.wikipedia.org/wiki/Operating_system) or other environments) |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [File](https://en.wikipedia.org/wiki/Computer_file)          | A record stored on disk, or a record synthesized on demand by a file server, which can be accessed by multiple processes. | Most operating systems                                       |
+| [Signal](https://en.wikipedia.org/wiki/Signal_(computing)); also [Asynchronous System Trap](https://en.wikipedia.org/wiki/Asynchronous_System_Trap) | A system message sent from one process to another, not usually used to transfer data but instead used to remotely command the partnered process. | Most operating systems                                       |
+| [Socket](https://en.wikipedia.org/wiki/Network_socket)       | Data sent over a network interface, either to a different process on the same computer or to another computer on the network. Stream-oriented ([TCP](https://en.wikipedia.org/wiki/Transmission_Control_Protocol); data written through a socket requires formatting to preserve message boundaries) or more rarely message-oriented ([UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol), [SCTP](https://en.wikipedia.org/wiki/SCTP)). | Most operating systems                                       |
+| [Unix domain socket](https://en.wikipedia.org/wiki/Unix_domain_socket) | Similar to an internet socket but all communication occurs within the kernel. Domain sockets use the file system as their address space. Processes reference a domain socket as an inode, and multiple processes can communicate with one socket | All POSIX operating systems and Windows 10[[2\]](https://en.wikipedia.org/wiki/Inter-process_communication#cite_note-2) |
+| [Message queue](https://en.wikipedia.org/wiki/Message_queue) | A data stream similar to a socket, but which usually preserves message boundaries. Typically implemented by the operating system, they allow multiple processes to read and write to the message queue without being directly connected to each other. | Most operating systems                                       |
+| [Pipe](https://en.wikipedia.org/wiki/Pipeline_(Unix))        | A unidirectional data channel. Data written to the write end of the pipe is buffered by the operating system until it is read from the read end of the pipe. Two-way data streams between processes can be achieved by creating two pipes utilizing [standard input and output](https://en.wikipedia.org/wiki/Stdin). | All [POSIX](https://en.wikipedia.org/wiki/POSIX) systems, Windows |
+| [Named pipe](https://en.wikipedia.org/wiki/Named_pipe)       | A pipe implemented through a file on the file system instead of [standard input and output](https://en.wikipedia.org/wiki/Stdin). Multiple processes can read and write to the file as a buffer for IPC data. | All POSIX systems, Windows, AmigaOS 2.0+                     |
+| [Shared memory](https://en.wikipedia.org/wiki/Shared_memory_(interprocess_communication)) | Multiple processes are given access to the same block of [memory](https://en.wikipedia.org/wiki/Memory_(computing)) which creates a shared buffer for the processes to communicate with each other. | All POSIX systems, Windows                                   |
+| [Message passing](https://en.wikipedia.org/wiki/Message_passing) | Allows multiple programs to communicate using message queues and/or non-OS managed channels, commonly used in concurrency models. | Used in [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call), [RMI](https://en.wikipedia.org/wiki/Remote_method_invocation), and [MPI](https://en.wikipedia.org/wiki/Message_Passing_Interface) paradigms, [Java RMI](https://en.wikipedia.org/wiki/Java_RMI), [CORBA](https://en.wikipedia.org/wiki/CORBA), [DDS](https://en.wikipedia.org/wiki/Data_Distribution_Service), [MSMQ](https://en.wikipedia.org/wiki/Microsoft_Message_Queuing), [MailSlots](https://en.wikipedia.org/wiki/MailSlot), [QNX](https://en.wikipedia.org/wiki/QNX), others |
+| [Memory-mapped file](https://en.wikipedia.org/wiki/Memory-mapped_file) | A file mapped to [RAM](https://en.wikipedia.org/wiki/RAM) and can be modified by changing memory addresses directly instead of outputting to a stream. This shares the same benefits as a standard [file](https://en.wikipedia.org/wiki/File_(computing)). | All POSIX systems, Windows                                   |
+
+#### LRPC
+
+## OS-7
+
+这一张讲Exception，exception分为interrupt,trap,fault,abort
+
+中断是异步的，因为你不知道什么时候会发生，其实fault也是，但是fault是同步的。
+
+Nested Interrupt: 在处理中断的时候又发生了一次中断，不能超过三次（例子：处理page fault中断，发现page fault中断的代码也缺页，再次触发page fault，处理这个page fault会abort）
+
+![](D:\course_material\os\final\pics\0007.JPG)
+
+#### Bottom Half
+
+当有多个IRQ要处理时，最多只能pengding一个IRQ，其他的IRQ就会被丢弃，所以使用Bottom Half，立即返回，意思是处理中断时间很短，中断本身延迟处理。
+
+中断处理程序在接收到中断之后，把记录状态的寄存器压栈，找到对应的中断处理程序，创建一个微进程处理，返回。微进程并不会立即执行，而是等下一次Sysycall时会检查微进程有没有处理结束，没有的话就处理。
+
+Bottom Half的四种处理机制（softirqs，tasklets，工作队列，内核线程）。
+
+![](D:\course_material\os\final\pics\0008.JPG)
+
+## OS-8
+
+DPL(descripter privilege level) 中断描述符所需要的特权级
+
+CPL(current privilege level) 当前特权级
+
+#### FLEX-SC
+
+
+
 
 
 
@@ -386,7 +442,89 @@ Linux 的系统调用通过 int 80h 实现，用[系统调用号](https://zh.wik
 
 MMU翻译后找到的PTE中有效位为0
 
-####
+#### 地址空间
+
+```
+/*
+ * Virtual memory map:                                Permissions
+ *                                                    kernel/user
+ *
+ *    4 Gig -------->  +------------------------------+
+ *                     |       Memory-mapped I/O      | RW/--
+ *    IOMEMBASE ---->  +------------------------------+ 0xfe000000
+ *                     |                              | RW/--
+ *                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *                     :              .               :
+ *                     :              .               :
+ *                     :              .               :
+ *                     |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~| RW/--
+ *                     |                              | RW/--
+ *                     |   Remapped Physical Memory   | RW/--
+ *                     |                              | RW/--
+ *    KERNBASE ----->  +------------------------------+ 0xf0000000
+ *                     |      Invalid Memory (*)      | --/--  PTSIZE
+ *    KSTACKTOP ---->  +------------------------------+ 0xefc00000      --+
+ *                     |     CPU0's Kernel Stack      | RW/--  KSTKSIZE   |
+ *                     | - - - - - - - - - - - - - - -|                   |
+ *                     |      Invalid Memory (*)      | --/--  KSTKGAP    |
+ *                     +------------------------------+                   |
+ *                     |     CPU1's Kernel Stack      | RW/--  KSTKSIZE   |
+ *                     | - - - - - - - - - - - - - - -|                 PTSIZE
+ *                     |      Invalid Memory (*)      | --/--  KSTKGAP    |
+ *                     +------------------------------+                   |
+ *                     :              .               :                   |
+ *                     :              .               :                   |
+ *    ULIM     ------> +------------------------------+ 0xef800000      --+
+ *                     |  Cur. Page Table (User R-)   | R-/R-  PTSIZE
+ *    UVPT      ---->  +------------------------------+ 0xef400000
+ *                     |          RO PAGES            | R-/R-  PTSIZE
+ *    UPAGES    ---->  +------------------------------+ 0xef000000
+ *                     |           RO ENVS            | R-/R-  PTSIZE
+ * UTOP,UENVS ------>  +------------------------------+ 0xeec00000
+ * UXSTACKTOP -/       |     User Exception Stack     | RW/RW  PGSIZE
+ *                     +------------------------------+ 0xeebff000
+ *                     |       Empty Memory (*)       | --/--  PGSIZE
+ *    USTACKTOP  --->  +------------------------------+ 0xeebfe000
+ *                     |      Normal User Stack       | RW/RW  PGSIZE
+ *                     +------------------------------+ 0xeebfd000
+ *                     |                              |
+ *                     |                              |
+ *                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *                     .                              .
+ *                     .                              .
+ *                     .                              .
+ *                     |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+ *                     |     Program Data & Heap      |
+ *    UTEXT -------->  +------------------------------+ 0x00800000
+ *    PFTEMP ------->  |       Empty Memory (*)       |        PTSIZE
+ *                     |                              |
+ *    UTEMP -------->  +------------------------------+ 0x00400000      --+
+ *                     |       Empty Memory (*)       |                   |
+ *                     | - - - - - - - - - - - - - - -|                   |
+ *                     |  User STAB Data (optional)   |                 PTSIZE
+ *    USTABDATA ---->  +------------------------------+ 0x00200000        |
+ *                     |       Empty Memory (*)       |                   |
+ *    0 ------------>  +------------------------------+                 --+
+ *
+ * (*) Note: The kernel ensures that "Invalid Memory" (ULIM) is *never*
+ *     mapped.  "Empty Memory" is normally unmapped, but user programs may
+ *     map pages there if desired.  JOS user programs map pages temporarily
+ *     at UTEMP.
+ */
+
+```
+
+#### PIC
+
+Programmable Interrupt Controller
+
+I/O devices have (unique or shared) Interrupt Request Lines (IRQs)。IRQs are mapped by special hardware to interrupt vectors, and passed to the CPUThis hardware is called a Programmable Interrupt Controller (PIC)
+
+#### ISR
+
+中断处理服务就是Interrupt Handler 	
+
+
 
 ## TODO
 
@@ -436,7 +574,7 @@ HW的标准答案
 
 【已解决】OS-4 11,14
 
-  堆栈的区别？
+【已解决】堆栈的区别？堆里面存的是全局变量（一些全局变量，一些被分配空间的field，被malloc的），栈一直向下增长，具体可参考memlayout
 
 ## 英语
 
@@ -462,9 +600,28 @@ detriment:损害 不利
 
 primitive: 原始的，原函数
 
+simultaneously： 同时
+
 eliminate: 消除 
 
 Rendezvous:会合
 
 revocation:撤销
 
+conventional: 常用的，常规的
+
+Cascade： 级联	
+
+Nested：嵌套的
+
+reentrant： 折返
+
+comprehensive：全面的
+
+sophisticated：复杂的
+
+paranoid：偏执
+
+Obsolete：过时的，弃用的
+
+negligible：微不足道
