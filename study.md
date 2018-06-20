@@ -10,7 +10,7 @@ ABI（Application Binary Layer）应用程序二进制接口，跟系统有关�
 
 API（Application Programming Interface）程序调用库函数，read(),write()
 
-![](D:\course_material\os\final\pics\0001.JPG)
+![](pics\0001.JPG)
 
 ### 8 important problems
 
@@ -38,7 +38,7 @@ API（Application Programming Interface）程序调用库函数，read(),write()
 
 主存（Main memory）即计算机内部最主要的存储器，用来加载各式各样的程序与数据以供[CPU](https://zh.wikipedia.org/wiki/CPU)直接运行与运用。由于[DRAM](https://zh.wikipedia.org/wiki/DRAM)的[性价比](https://zh.wikipedia.org/wiki/%E6%80%A7%E5%83%B9%E6%AF%94)很高，且扩展性也不错，是现今一般计算机[主存](https://zh.wikipedia.org/wiki/%E4%B8%BB%E8%A8%98%E6%86%B6%E9%AB%94)的最主要部分。
 
-PC架构：von Neumann Model（冯 诺伊曼模式）![](D:\course_material\os\final\pics\0003.JPG)
+PC架构：von Neumann Model（冯 诺伊曼模式）![](pics\0003.JPG)
 
 程序运行时，程序的指令和数据会被读到主存里面，CPU会一条一条的执行主存里面的指令。
 
@@ -130,7 +130,7 @@ Memory-management Register(内存管理寄存器)
 4. IPC与线程间通信？？？
 5. 对Syscall的处理：trap 到用户模式
 6. 微内核把所有原来内核里面的系统服务都用进程来实现，要调用系统服务的时候，使用IPC
-   ![](D:\Courses\OS\PPT\pics\0004.JPG)
+   ![](pics\0004.JPG)
 7. Redirection allows call traps to link directly to executable binaries without modifying the kernel!Just need an emulation library
 
 #### L4 Microkernel
@@ -179,13 +179,13 @@ is a kernel architecturebased on combining aspects of microkernel and monolithic
 
 
 
-![](D:\course_material\os\final\pics\0005.jpg)
+![](pics\0005.jpg)
 
 ##OS-4
 
 PAE
 
-![](D:\course_material\os\final\pics\0006.JPG)
+![](pics\0006.JPG)
 
 ##OS-5
 
@@ -272,7 +272,7 @@ PCB:
 
 Nested Interrupt: 在处理中断的时候又发生了一次中断，不能超过三次（例子：处理page fault中断，发现page fault中断的代码也缺页，再次触发page fault，处理这个page fault会abort）
 
-![](D:\course_material\os\final\pics\0007.JPG)
+![](pics\0007.JPG)
 
 #### Bottom Half
 
@@ -282,7 +282,7 @@ Nested Interrupt: 在处理中断的时候又发生了一次中断，不能超�
 
 Bottom Half的四种处理机制（softirqs，tasklets，工作队列，内核线程）。
 
-![](D:\course_material\os\final\pics\0008.JPG)
+![](pics/0008.JPG)
 
 ## OS-8
 
@@ -309,7 +309,7 @@ I/O子系统
 
 ext,ext2
 
-![](D:\Courses\OS\PPT\pics\0001.png)
+![](pics\0001.png)
 
 
 
