@@ -299,47 +299,156 @@ CPL(current privilege level) 当前特权级
 
 
 
+## OS-9
+
+I/O子系统
+
+## OS-10
+
+文件系统
+
+ext,ext2
+
+![](D:\Courses\OS\PPT\pics\0001.png)
 
 
 
+ext4,NTFS用extent(起始block+length)来代替单纯的block
+
+​                      用Btree来存文件，这样查询O(logN)
 
 
 
+## OS-11
+
+FAT32, NTFS
+
+FAT:由一个cluser找到下一个cluser
+
+[FAT32长文件名短文件名目录项](https://blog.csdn.net/u010650845/article/details/60780979)
+
+NTFS
+
+[FAT、HPFS 和 NTFS 文件系统概述](https://support.microsoft.com/zh-cn/help/100108/overview-of-fat-hpfs-and-ntfs-file-systems)
+
+## OS-12
+
+File System Durability & Crash Recovery
+
+- Write-back（回写模式）在数据更新时只写入缓存Cache。只在数据被替换出缓存时，被修改的缓存数据才会被写到后端存储。此模式的优点是数据写入速度快，因为不需要写存储；缺点是一旦更新后的数据未被写入存储时出现系统掉电的情况，数据将无法找回。
+
+- **Write-misses写缺失的处理方式**
+
+- 对于写操作，存在写入缓存缺失数据的情况，这时有两种处理方式：
+
+- - **Write allocate** (aka **Fetch on write**) - Datum at the missed-write location is loaded to cache, followed by a write-hit operation. In this approach, write misses are similar to read-misses.
+  - **No-write allocate** (aka **Write-no-allocate**, **Write around**) - Datum at the missed-write location is not loaded to cache, and is written directly to the backing store. In this approach, actually only system reads are being cached.
+
+- Write allocate方式将写入位置读入缓存，然后采用write-hit（缓存命中写入）操作。写缺失操作与读缺失操作类似。
+
+- No-write allocate方式并不将写入位置读入缓存，而是直接将数据写入存储。这种方式下，只有读操作会被缓存。
+
+- 无论是Write-through还是Write-back都可以使用写缺失的两种方式之一。只是通常Write-back采用Write allocate方式，而Write-through采用No-write allocate方式；因为多次写入同一缓存时，Write allocate配合Write-back可以提升性能；而对于Write-through则没有帮助。
 
 
 
+## OS-13
+
+ext3
+
+ext3 支持三种日志模式，划分的依据是选择元数据块还是数据块写入日志，以及何时写入日志。
+
+**1.** **日志模式（Journal****）：**文件系统所有数据和元数据的改变都被记入日志。这种模式减少了丢失每个文件的机会，但需要很多额外的磁盘访问。例如：当一个新文件被创建时，它的所有数据块都必须复制一份作为日志记录。这是最安全但最慢的日志模式。
+
+**2.** **预定模式（Ordered****）：**只对文件系统元数据块的改变才记入日志，这样可以确保文件系统的一致性，但是不能保证文件内容的一致性。然而，ext3文件系统把元数据块和相关的数据块进行分组，以便在元数据块写入日志之前写入数据块。这样，就可以减少文件内数据损坏的机会；例如，确保增大文件的任何写访问都完全受日志的保护。这是缺省的 ext3  日志模式。
+
+**3.** **写回（Writeback****）：**只有对文件系统元数据的改变才被记入日志**，**对文件数据的更新与元数据记录可以不同步（相对Ordered模式而言），即ext3是支持异步的日志。
+
+##OS-14
+
+闪存设备跟[碟盘存储设备](https://zh.wikipedia.org/wiki/%E7%A2%9F%E7%9B%A4%E5%AD%98%E5%84%B2)，在硬件上有不同的特性，例如：
+
+- 抺除区块（Erasing blocks）：闪存的区块（block）在写入之前，要先做抹除（erase）的动作。抺除区块的时间可能会很长，因此最好利用系统闲置的时间来进行抹除。
+- [耗损平均技术](https://zh.wikipedia.org/wiki/%E8%80%97%E6%90%8D%E5%B9%B3%E5%9D%87%E6%8A%80%E8%A1%93)（Wear leveling）：闪存的区块有抺写次数的限制，重复抺除、写入同一个单一区块将会造成读取速度变慢，甚至损坏而无法使用，因此闪存设备的驱动程序需要将抺写的区块分散，以延长闪存寿命。用于闪存的文件系统，也需要设计出平均写入各区块的功能。
+- [随机存取](https://zh.wikipedia.org/wiki/%E9%9A%A8%E6%A9%9F%E5%AD%98%E5%8F%96)（Random access）：一般的硬盘，读写数据时，需要旋转磁盘，以找到存放的扇区，因此，一般使用于磁盘的文件系统，会作最优化，以避免搜索磁盘的作用。但是闪存可以随机存取，没有查找延迟时间，因此不需要这个最优化。
+
+设计闪存文件系统的基本概念是，当存储数据需要更新时，文件系统将会把新的复本写入一个新的闪存区块，将文件指针重新指向，并在闲置时期将原有的区块抺除。例如[JFFS2](https://zh.wikipedia.org/wiki/JFFS2)与[YAFFS](https://zh.wikipedia.org/wiki/YAFFS)，都是这样设计。
+
+FlexFS
 
 
 
+##OS-15
+
+[GFS](https://blog.csdn.net/opennaive/article/details/7483523) 
+
+NFS
+
+## OS-16 
+
+虚拟化
+
+Virtualizationcan be defined many ways. I will try to define it formally and also define itby giving a few examples. However loosely, virtualization is the addition of asoftware layer (the virtual machine monitor) between the hardware and theexisting software that exports an interface at the same level as the underlyinghardware.
+
+Inthe strictest case the exported interface is the exact same as the underlyinghardware and the virtual machine monitor provides no functionality exceptmultiplexing the hardware among multiple VMs. This was largely the case in theold IBM VM/360 systems.
+
+Howeverthe layer really can export a different hardware interface as the case incross-ISA emulators. Also the layer can provide additional functionality notpresent in the operating system.
+
+Ithink of virtualization as the addition of a layer of software that can run theoriginal software with little or no changes.
+
+## OS-17
+
+Virtualization: CPU and Memory
+
+虚拟机想执行特权指令：trap and emulate
 
 
 
+## OS-18
+
+I/O虚拟化
+
+[总结OS-16/17/18的一篇讲虚拟化的文章](https://www.binss.me/blog/An-overview-of-the-virtualization-of-x86/)
 
 
 
+## OS-19
+
+[Scalable Locking](https://www.ibm.com/developerworks/cn/linux/l-cn-rwspinlock3/index.html)
 
 
 
+一个CAS操作的过程可以用以下c代码表示: [[1\]](https://zh.wikipedia.org/wiki/%E6%AF%94%E8%BE%83%E5%B9%B6%E4%BA%A4%E6%8D%A2#cite_note-1)
+
+```c
+1 int cas(long *addr, long old, long new)
+2 {
+3     /* Executes atomically. */
+4     if(*addr != old)
+5         return 0;
+6     *addr = new;
+7     return 1;
+8 }
+```
 
 
 
+##OS-20
 
+读写锁
 
+除了锁之外可以用一些原子操作例如fetch_and_add, compare_and_swap
 
+## OS-21
 
+bug survey:
 
+1. 违反原子性
+2. 两个线程之间的执行顺序违反
 
+##OS-22
 
-
-
-
-
-
-
-
-
-
-
+死锁
 
 
 
@@ -524,7 +633,9 @@ I/O devices have (unique or shared) Interrupt Request Lines (IRQs)。IRQs are ma
 
 中断处理服务就是Interrupt Handler 	
 
+####Linux启动流程
 
+https://www.binss.me/blog/boot-process-of-linux/
 
 ## TODO
 
@@ -576,6 +687,20 @@ HW的标准答案
 
 【已解决】堆栈的区别？堆里面存的是全局变量（一些全局变量，一些被分配空间的field，被malloc的），栈一直向下增长，具体可参考memlayout
 
+OS-10  30
+
+OS-12 30,43
+
+OS-13 20 xaction是什么
+
+ext3 journal模式，什么时候commit，什么时候free，什么时候journal上的commit被写入disk
+
+什么是FlexFS
+
+OS-17 37 44-
+
+critical sections 是什么
+
 ## 英语
 
 voltage:电压
@@ -625,3 +750,29 @@ paranoid：偏执
 Obsolete：过时的，弃用的
 
 negligible：微不足道
+
+Durability:持久力，续航
+
+tension：紧张，拉力
+
+invariants : 不变
+
+Durable (Persistence):耐用（持久性）
+
+semantics：语义
+
+barrier: 屏障
+
+batch:批量
+
+Isomorphism： 同构
+
+Encapsulation：封装
+
+Interposition：介入
+
+Isolation：隔离
+
+Mobility：流动性
+
+violation:违反
